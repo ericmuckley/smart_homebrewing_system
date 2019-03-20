@@ -2,7 +2,7 @@
 """
 Created on Sat Jan 26 16:15:06 2019
 
-@author: Eric
+@author: ericmuckley@gmail.com
 """
 import time
 import numpy as np
@@ -17,12 +17,12 @@ plt.rcParams['ytick.labelsize'] = ls
 
 
 
-def open_ssh_tunnel(cades_ip='172.22.5.231',
-                    key_file_path='C:\\Users\\a6q\\tf-container.pem'):
-    '''Open a connection to ORNL CADES virtual machine using the CADES 
-    IP address and a path to the .pem private key file for the CADES instance.
+def open_ssh_tunnel(rpi_ip='RPI_IP_ADDRESS',
+                    key_file_path='PATH_TO_PRIVATE_KEY_FILE.pem'):
+    '''Open a connection to rpi using the
+    IP address and a path to the .pem private key file for the rpi.
     Example inputs:
-        cades_ip = '172.22.5.231'    
+        rpi_ip = '172.22.5.231'    
         key_file_path = 'C:\\Users\\a6q\\tf-container.pem'
     Returns an SSH session instance.
     '''
@@ -36,9 +36,9 @@ def open_ssh_tunnel(cades_ip='172.22.5.231',
 
 
 
-def open_ssh_w_password(ip='192.168.0.174',
+def open_ssh_w_password(ip='RPI_IP_ADDRESS',
                         username='pi',
-                        password='treehead1'):
+                        password='PASSWORD'):
     import paramiko
     #k = paramiko.RSAKey.from_private_key_file(key_file_path)
     ssh = paramiko.SSHClient()
@@ -48,38 +48,38 @@ def open_ssh_w_password(ip='192.168.0.174',
     return ssh
 
 
-def send_to_cades(ssh, local_file_path, cades_file_path):
-    '''Send a local file to CADES.
+def send_to_pi(ssh, local_file_path, pi_file_path):
+    '''Send a local file to rpi.
     Example inputs:
         ssh = open_ssh_tunnel(cades_ip, key_file_path)
         local_file_path = 'C:\\Users\\a6q\\exp_data\\my_text.txt'
-        cades_file_path = '/home/cades/my_text.txt'
+        cades_file_path = '/home/pi/my_text.txt'
     '''
     ftp = ssh.open_sftp()
-    ftp.put(local_file_path, cades_file_path)
+    ftp.put(local_file_path, pi_file_path)
     ftp.close()
 
 
 
-def pull_from_cades(ssh, local_file_path, cades_file_path):
-    '''Pull a file from CADES onto local PC.
+def pull_from_pi(ssh, local_file_path, pi_file_path):
+    '''Pull a file from rpi onto local PC.
     Example inputs:
-        ssh = open_ssh_tunnel(cades_ip, key_file_path)    
+        ssh = open_ssh_tunnel(rpi_ip, key_file_path)    
         local_file_path = 'C:\\Users\\a6q\\exp_data\\my_text.txt'
-        cades_file_path = '/home/cades/my_text.txt'
+        pi_file_path = '/home/pi/my_text.txt'
     '''
     ftp = ssh.open_sftp()
     ftp.get(cades_file_path, local_file_path)
     ftp.close()
 
-def run_script_on_cades(ssh, cades_script_path):
-    '''Run a Python script on CADES from the local PC and 
+def run_script_on_rpi(ssh, rpi_script_path):
+    '''Run a Python script on rpi from the local PC and 
     prints the output and errors from the script.
     Example inputs:
-        ssh = open_ssh_tunnel(cades_ip, key_file_path)    
-        cades_script_path = '/home/cades/scripts/my_python_script.py'
+        ssh = open_ssh_tunnel(rpi_ip, key_file_path)    
+        rpi_script_path = '/home/pi/scripts/my_python_script.py'
     '''
-    stdin, stdout, stderr = ssh.exec_command('python '+cades_script_path)
+    stdin, stdout, stderr = ssh.exec_command('python '+pi_script_path)
     [print(line) for line in stdout.readlines()]
     [print(line) for line in stderr.readlines()]
     
@@ -98,7 +98,7 @@ for i in range(5):
     print(i)
 
     try:
-        pull_from_cades(ssh, destination_file, file_to_pull)
+        pull_from_pi(ssh, destination_file, file_to_pull)
         df = pd.read_csv(destination_file)
             
         #plot sensor output over time
